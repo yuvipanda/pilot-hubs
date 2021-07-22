@@ -19,7 +19,11 @@ local data = {
         spec+: {
             // FIXME: Not sure if this is necessary?
             configBase: "s3://2i2c-carbonplan-kops-state/%s" % data.cluster.metadata.name,
+            warmPool: {
+                enableLifecycleHook: true,
+                maxSize: 10
 
+            },
             etcdClusters: [
                 {
                     cpuRequest: "500m",
