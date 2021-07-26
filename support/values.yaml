@@ -38,6 +38,9 @@ prometheus:
     persistentVolume:
       size: 100Gi
     retention: 90d
+    strategy:
+      # Can't really do rolling update, we have a persistent disk attached
+      type: Recreate
     service:
       type: ClusterIP
 
