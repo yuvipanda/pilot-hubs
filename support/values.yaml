@@ -5,6 +5,10 @@ ingress-nginx:
     podLabels:
       hub.jupyter.org/network-access-proxy-http: 'true'
 prometheus:
+  kube-state-metrics:
+    # Collect info about specific labels
+    extraArgs:
+    - --metric-labels-allowlist=nodes=[cloud.google.com/gke-nodepool,kops.k8s.io/instancegroup]
   networkPolicy:
     enabled: true
   alertmanager:
