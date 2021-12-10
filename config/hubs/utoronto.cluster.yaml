@@ -29,9 +29,12 @@ hubs:
       enabled: false
     config: &utorontoHubConfig
       azureFile:
-        enabled: true
-      nfs:
         enabled: false
+      nfs:
+        enabled: true
+        pv:
+          serverIP: jupyterhub-2i2c-nfs-vm
+          baseShareName: /export/jupyterhub-2i2c-nfs-data-disk-1
         shareCreator:
           enabled: false
       jupyterhub:
@@ -55,12 +58,6 @@ hubs:
           image:
             name: quay.io/2i2c/utoronto-image
             tag: 83a724f5b829
-          storage:
-            type: none
-            extraVolumes:
-              - name: home
-                persistentVolumeClaim:
-                  claimName: home-azurefile
         scheduling:
           userPlaceholder:
             enabled: false
