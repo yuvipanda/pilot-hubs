@@ -59,7 +59,7 @@ jupyterhub:
       enabled: false
       repo: ""
       branch: ""
-    2i2c:
+    2i2c: # Needed in binderhub as we have auth
       # Should 2i2c engineering staff user IDs be injected to the admin_users
       # configuration of the JupyterHub's authenticator by our custom
       # jupyterhub_config.py snippet as declared in hub.extraConfig?
@@ -79,7 +79,7 @@ jupyterhub:
         - georgianaelena@2i2c.org
         - sgibson@2i2c.org
         - yuvipanda@2i2c.org
-  ingress:
+  ingress: # Needed in binderhub as we have https
     enabled: true
     annotations:
       nginx.ingress.kubernetes.io/proxy-body-size: 256m
@@ -111,10 +111,10 @@ jupyterhub:
     hook:
       enabled: false
   proxy:
-    service:
+    service: # needed in binderhub as we use ingress
       type: ClusterIP
     chp:
-      nodeSelector:
+      nodeSelector: # needed in binderhub as we want to use different kinds of nodes
         hub.jupyter.org/node-purpose: core
       resources:
         requests:
@@ -127,7 +127,7 @@ jupyterhub:
     traefik:
       image:
         tag: v2.4.8
-      nodeSelector:
+      nodeSelector: # needed in binderhub as we want to use different kinds of nodes
         hub.jupyter.org/node-purpose: core
       resources:
         requests:
@@ -145,7 +145,7 @@ jupyterhub:
       # By default, /bin/sh is used as shell for terminals, not /bin/bash
       # Most people do not expect this, so let's match expectation
       SHELL: /bin/bash
-    extraFiles:
+    extraFiles: # needed in binderhub as we use it to cull idle pods
       jupyter_notebook_config.json:
         mountPath: /usr/local/etc/jupyter/jupyter_notebook_config.json
         # if a user leaves a notebook with a running kernel,
@@ -165,7 +165,7 @@ jupyterhub:
             cull_connected: true
     startTimeout: 600 # 10 mins, because sometimes we have too many new nodes coming up together
     defaultUrl: /tree
-    nodeSelector:
+    nodeSelector: # needed in binderhub as we have different types of nodes
       hub.jupyter.org/node-purpose: user
     image:
       name: quay.io/2i2c/2i2c-hubs-image
@@ -202,7 +202,7 @@ jupyterhub:
       #    node can fit 160 user pods, and since kubernetes already caps us at 100 pods a node,
       #    this guarantee doesn't actually change our scheduling.
       guarantee: 0.05
-    networkPolicy:
+    networkPolicy: # needed in binderhub as we want to enforce networkpolicy. Should be upstreamed for z2jh 2
       # Allow unrestricted access to the internet but not local cluster network
       enabled: true
       egress:
@@ -248,18 +248,18 @@ jupyterhub:
                   app.kubernetes.io/component: traefik
   hub:
     config:
-      JupyterHub:
+      JupyterHub: # needed in binderhub because we want prometheus
         # Allow unauthenticated prometheus requests
         # Otherwise our prometheus server can't get hub metrics
         authenticate_prometheus: false
-      KubeSpawner:
+      KubeSpawner: # needed in binderhub because we want $HOME to work and sudo to not
         # Make sure working directory is ${HOME}
         working_dir: /home/jovyan
         extra_container_config:
           securityContext:
             # Explicitly disallow setuid binaries from working inside the container
             allowPrivilegeEscalation: false
-      Authenticator:
+      Authenticator: # needed in binderhub, dependent on how we do health checks
         # Don't allow test username to login into the hub
         # The test service will still be able to create this hub username
         # and start their server.
@@ -314,7 +314,7 @@ jupyterhub:
       # tests against a hub, we read this token from the k8s Secret to acquire
       # the credentials needed to interacting with the JupyterHub API.
       #
-      hub-health:
+      hub-health: # needed in binderhub because we want health checks
         # FIXME: With JupyterHub 2 we can define a role for this service with
         #        more tightly scoped permissions based on our needs.
         #
@@ -322,9 +322,9 @@ jupyterhub:
     image:
       name: quay.io/2i2c/pilot-hub
       tag: "0.0.1-n3027.h52c5e2a"
-    nodeSelector:
+    nodeSelector: # needed in binderhub  because we have different types of nodes
       hub.jupyter.org/node-purpose: core
-    networkPolicy:
+    networkPolicy: # needed in binderhub because we want netpol
       enabled: true
       ingress:
         - from:

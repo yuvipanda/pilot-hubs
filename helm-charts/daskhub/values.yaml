@@ -1,4 +1,4 @@
-basehub:
+basehub: # needed by binderhub because this is all just relevant to dask
   # Copied from https://github.com/dask/helm-chart/blob/master/daskhub/values.yaml
   # FIXME: Properly use the upstream chart.
   jupyterhub:
@@ -98,7 +98,7 @@ basehub:
           else:
               print("dask-gateway service not found. Did you set jupyterhub.hub.services.dask-gateway.apiToken?")
 
-dask-gateway:
+dask-gateway: # needed by binderhub
   enabled: true # Enabling dask-gateway will install Dask Gateway as a dependency.
   # Futher Dask Gateway configuration goes here
   # See https://github.com/dask/dask-gateway/blob/master/resources/helm/dask-gateway/values.yaml
