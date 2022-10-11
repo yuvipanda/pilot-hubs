@@ -7,7 +7,7 @@ from pathlib import Path
 
 from file_acquisition import get_decrypted_file, get_decrypted_files
 from hub import Hub
-from utils import print_colour
+from utils import auth_aws, auth_gcp, print_colour
 
 
 class Cluster:
@@ -159,42 +159,34 @@ class Cluster:
 
         with tempfile.NamedTemporaryFile() as kubeconfig:
             orig_kubeconfig = os.environ.get("KUBECONFIG", None)
-            orig_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID", None)
-            orig_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY", None)
             try:
                 with get_decrypted_file(key_path) as decrypted_key_path:
-
                     decrypted_key_abspath = os.path.abspath(decrypted_key_path)
                     if not os.path.isfile(decrypted_key_abspath):
                         raise FileNotFoundError("The decrypted key file does not exist")
                     with open(decrypted_key_abspath) as f:
                         creds = json.load(f)
 
-                    os.environ["AWS_ACCESS_KEY_ID"] = creds["AccessKey"]["AccessKeyId"]
-                    os.environ["AWS_SECRET_ACCESS_KEY"] = creds["AccessKey"][
-                        "SecretAccessKey"
-                    ]
+                    access_key_id = creds["AccessKey"]["AccessKeyId"]
+                    access_key_secret = creds["AccessKey"]["SecretAccessKey"]
 
-                os.environ["KUBECONFIG"] = kubeconfig.name
+                with auth_aws(access_key_id, access_key_secret):
+                    os.environ["KUBECONFIG"] = kubeconfig.name
 
-                subprocess.check_call(
-                    [
-                        "aws",
-                        "eks",
-                        "update-kubeconfig",
-                        f"--name={cluster_name}",
-                        f"--region={region}",
-                    ]
-                )
+                    subprocess.check_call(
+                        [
+                            "aws",
+                            "eks",
+                            "update-kubeconfig",
+                            f"--name={cluster_name}",
+                            f"--region={region}",
+                        ]
+                    )
 
-                yield
+                    yield
             finally:
                 if orig_kubeconfig is not None:
                     os.environ["KUBECONFIG"] = orig_kubeconfig
-                if orig_access_key_id is not None:
-                    os.environ["AWS_ACCESS_KEY_ID"] = orig_access_key_id
-                if orig_secret_access_key is not None:
-                    os.environ["AWS_SECRET_ACCESS_KEY"] = orig_secret_access_key
 
     def auth_azure(self):
         """
@@ -269,38 +261,25 @@ class Cluster:
         location = config.get("zone", config.get("region"))
         cluster = config["cluster"]
         with tempfile.NamedTemporaryFile() as kubeconfig:
-            # CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE is removed as the action of
-            # "gcloud auth activate-server-account" will be secondary to it
-            # otherwise, and this env var can be set by GitHub Actions we use
-            # before using this deployer script to deploy hubs to clusters.
-            orig_cloudsdk_auth_credential_file_override = os.environ.pop(
-                "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE", None
-            )
             orig_kubeconfig = os.environ.get("KUBECONFIG")
             try:
                 os.environ["KUBECONFIG"] = kubeconfig.name
                 with get_decrypted_file(key_path) as decrypted_key_path:
-                    os.environ[
-                        "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE"
-                    ] = decrypted_key_path
-                    subprocess.check_call(
-                        [
-                            "gcloud",
-                            "container",
-                            "clusters",
-                            # --zone works with regions too
-                            f"--zone={location}",
-                            f"--project={project}",
-                            "get-credentials",
-                            cluster,
-                        ]
-                    )
+                    with auth_gcp(decrypted_key_path):
+                        subprocess.check_call(
+                            [
+                                "gcloud",
+                                "container",
+                                "clusters",
+                                # --zone works with regions too
+                                f"--zone={location}",
+                                f"--project={project}",
+                                "get-credentials",
+                                cluster,
+                            ]
+                        )
 
-                    yield
+                        yield
             finally:
                 if orig_kubeconfig is not None:
                     os.environ["KUBECONFIG"] = orig_kubeconfig
-                if orig_cloudsdk_auth_credential_file_override is not None:
-                    os.environ[
-                        "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE"
-                    ] = orig_cloudsdk_auth_credential_file_override

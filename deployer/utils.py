@@ -1,5 +1,6 @@
 import os
 import subprocess
+from contextlib import contextmanager
 
 from markdownTable import markdownTable
 
@@ -141,3 +142,55 @@ Merging this PR will trigger the following deployment actions.
     # Save comment body to a file to be uploaded as an atrifact by GitHub Actions
     with open("comment-body.txt", "w") as f:
         f.write(comment_body)
+
+
+@contextmanager
+def auth_gcp(key_file_path):
+    """
+    Authenticate to GCP with given service account key file
+
+    Authentication is unset when the contextmanager goes out of scope.
+
+    key_file_path is a path to an unencrypted JSON ServiceAccount
+    key from google cloud.
+    """
+    # CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE is removed as the action of
+    # "gcloud auth activate-server-account" will be secondary to it
+    # otherwise, and this env var can be set by GitHub Actions we use
+    # before using this deployer script to deploy hubs to clusters.
+    orig_cloudsdk_auth_credential_file_override = os.environ.pop(
+        "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE", None
+    )
+    try:
+        os.environ["CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE"] = key_file_path
+
+        yield
+    finally:
+        if orig_cloudsdk_auth_credential_file_override is not None:
+            os.environ[
+                "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE"
+            ] = orig_cloudsdk_auth_credential_file_override
+
+
+@contextmanager
+def auth_aws(access_key_id, secret_access_key):
+    """
+    Authenticate to AWS with given credentials
+
+    Authentication is unset when the contextmanager goes out of scope.
+
+    access_key_id and secret_access_key are API credentials for AWS.
+    """
+    orig_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID", None)
+    orig_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY", None)
+
+    try:
+        os.environ["AWS_ACCESS_KEY_ID"] = access_key_id
+        os.environ["AWS_SECRET_ACCESS_KEY"] = secret_access_key
+
+        yield
+    finally:
+        if orig_access_key_id is not None:
+            os.environ["AWS_ACCESS_KEY_ID"] = orig_access_key_id
+        if orig_secret_access_key is not None:
+            os.environ["AWS_SECRET_ACCESS_KEY"] = orig_secret_access_key
