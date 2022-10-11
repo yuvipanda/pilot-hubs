@@ -280,29 +280,23 @@ class Cluster:
             try:
                 os.environ["KUBECONFIG"] = kubeconfig.name
                 with get_decrypted_file(key_path) as decrypted_key_path:
+                    os.environ[
+                        "CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE"
+                    ] = decrypted_key_path
                     subprocess.check_call(
                         [
                             "gcloud",
-                            "auth",
-                            "activate-service-account",
-                            f"--key-file={os.path.abspath(decrypted_key_path)}",
+                            "container",
+                            "clusters",
+                            # --zone works with regions too
+                            f"--zone={location}",
+                            f"--project={project}",
+                            "get-credentials",
+                            cluster,
                         ]
                     )
 
-                subprocess.check_call(
-                    [
-                        "gcloud",
-                        "container",
-                        "clusters",
-                        # --zone works with regions too
-                        f"--zone={location}",
-                        f"--project={project}",
-                        "get-credentials",
-                        cluster,
-                    ]
-                )
-
-                yield
+                    yield
             finally:
                 if orig_kubeconfig is not None:
                     os.environ["KUBECONFIG"] = orig_kubeconfig
