@@ -306,13 +306,14 @@ resource "google_container_node_pool" "notebook" {
       value  = "user"
       effect = "NO_SCHEDULE"
       }],
+      each.value.taints,
       # Add extra taint explicitly if GPU is enabled, so non-GPU pods aren't scheduled here
       # Terraform implicitly adds this taint anyway, and tries to recreate the nodepool if we re-apply
       each.value.gpu.enabled ? [{
         effect = "NO_SCHEDULE"
         key    = "nvidia.com/gpu"
         value  = "present"
-      }] : []
+      }] : [],
     )
     machine_type = each.value.machine_type
 

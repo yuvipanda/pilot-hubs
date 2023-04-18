@@ -38,6 +38,26 @@ notebook_nodes = {
       type: "",
       count: 0
     }
+  },
+  "hackanexoplanet": {
+    min: 1,
+    max: 100,
+    machine_type: "n1-highmem-8",
+    labels: {
+      "2i2c.org/community": "hackanexoplanet"
+    },
+    taints: [
+      {
+        key: "2i2c.org_community",
+        value: "hackanexoplanet",
+        effect: "NO_SCHEDULE"
+      }
+    ],
+    gpu: {
+      enabled: false,
+      type: "",
+      count: 0
+    }
   }
 }
 

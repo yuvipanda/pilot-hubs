@@ -46,6 +46,15 @@ jupyterhub:
           name: ""
           url: ""
   singleuser:
+    extraTolerations:
+      - key: "2i2c.org_community"
+        operator: "Equal"
+        value: "hackanexoplanet"
+        effect: "NoSchedule"
+
+    nodeSelector:
+      # Dask workers get their own pre-emptible pool
+      2i2c.org/community: hackanexoplanet
     image:
       # Image repository: https://github.com/2i2c-org/hackanexoplanet-env
       name: quay.io/2i2c/hackanexoplanet-image
