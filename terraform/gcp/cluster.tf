@@ -139,8 +139,8 @@ resource "google_container_cluster" "cluster" {
 
       content {
         resource_type = "memory"
-        minimum       = var.min_memory
-        maximum       = var.max_memory
+        minimum       = 1
+        maximum       = 2048
       }
     }
 
@@ -149,8 +149,18 @@ resource "google_container_cluster" "cluster" {
 
       content {
         resource_type = "cpu"
-        minimum       = var.min_cpu
-        maximum       = var.max_cpu
+        minimum       = 1
+        maximum       = 1024
+      }
+    }
+    dynamic "resource_limits" {
+      for_each = var.enable_node_autoprovisioning ? var.node_autoprovisioning_accelerators : []
+      iterator = accelerator
+
+      content {
+        resource_type = accelerator.value
+        minimum       = 1
+        maximum       = 1024
       }
     }
   }

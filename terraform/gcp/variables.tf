@@ -328,49 +328,29 @@ variable "enable_node_autoprovisioning" {
 
 // Defaults for the below variables are taken from the original Pangeo cluster setup
 // https://github.com/pangeo-data/pangeo-cloud-federation/blob/d051d1829aeb303d321dd483450146891f67a93c/deployments/gcp-uscentral1b/Makefile#L25
-variable "min_memory" {
-  type        = number
-  default     = 1
+variable "node_autoprovisioning_accelerators" {
+  type = set(string)
+  default = [
+    "nvidia-a100-80gb",
+    "nvidia-l4",
+    "nvidia-l4-vws",
+    "nvidia-tesla-a100",
+    "nvidia-tesla-k80",
+    "nvidia-tesla-p100",
+    # "nvidia-tesla-p100-vws",
+    "nvidia-tesla-p4",
+    # "nvidia-tesla-p4-vws",
+    "nvidia-tesla-t4",
+    # "nvidia-tesla-t4-vws",
+    "nvidia-tesla-v100"
+  ]
   description = <<-EOT
-  When auto-provisioning nodes, this is the minimum amount of memory the nodes
-  should allocate in GB.
+  List of accelerators to enable if node_autoprovisioning is enabled
 
   Default = 1 GB
   EOT
 }
 
-variable "max_memory" {
-  type        = number
-  default     = 5200
-  description = <<-EOT
-  When auto-provisioning nodes, this is the minimum amount of memory the nodes
-  should allocate in GB.
-
-  Default = 5200 GB
-  EOT
-}
-
-variable "min_cpu" {
-  type        = number
-  default     = 1
-  description = <<-EOT
-  When auto-provisioning nodes, this is the minimum number of cores in the
-  cluster to which the cluster can scale.
-
-  Default = 1 CPU
-  EOT
-}
-
-variable "max_cpu" {
-  type        = number
-  default     = 1000
-  description = <<-EOT
-  When auto-provisioning nodes, this is the minimum number of cores in the
-  cluster to which the cluster can scale.
-
-  Default = 1000
-  EOT
-}
 
 variable "hub_cloud_permissions" {
   type = map(

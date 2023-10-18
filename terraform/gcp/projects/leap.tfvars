@@ -113,3 +113,6 @@ dask_nodes = {
     machine_type : "n2-highmem-16"
   },
 }
+
+enable_node_autoprovisioning = true
+

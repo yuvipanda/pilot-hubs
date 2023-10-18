@@ -10,6 +10,10 @@ basehub:
       # Name of Google Filestore share
       baseShareName: /homes/
   jupyterhub:
+    scheduling:
+      userPods:
+        nodeAffinity:
+          matchNodePurpose: ignore
     custom:
       # Extra mount point for admins to access to all users' home dirs
       # Ref https://github.com/2i2c-org/infrastructure/issues/2105
@@ -245,6 +249,59 @@ basehub:
                 mem_32: *medium_mem_32
             image: *profile_list_profile_options_image
           kubespawner_override: *medium_kubespawner_override
+
+        - display_name: Custom
+          slug: custom
+          profile_options:
+            image: *profile_list_profile_options_image
+            machine_family:
+              display_name: Machine Family
+              choices: {}
+              unlisted_choice:
+                enabled: true
+                display_name: Machine Family
+                kubespawner_override:
+                  node_selector:
+                    cloud.google.com/machine-family: "{value}"
+                  node_affinity_preferred: []
+                  node_affinity_required: []
+            memory:
+              display_name: Memory (in GB)
+              choices: {}
+              unlisted_choice:
+                enabled: true
+                validation_regex: "\\d+"
+                validation_message: "Must be a number"
+                display_name: Memory (in GiB)
+                kubespawner_override:
+                  mem_guarantee: "{value}G"
+                  mem_limit: "{value}G"
+            gpu-type:
+              display_name: GPU Type
+              choices:
+                none:
+                  display_name: No GPU
+                  slug: none
+                  kubespawner_override: {}
+              unlisted_choice:
+                enabled: true
+                display_name: GPU Type
+                kubespawner_override:
+                  node_selector:
+                    cloud.google.com/gke-accelerator: "{value}"
+            gpu:
+              display_name: GPU Count
+              choices:
+                none:
+                  display_name: No GPU
+                  slug: none
+                  kubespawner_override: {}
+              unlisted_choice:
+                enabled: true
+                display_name: GPU count
+                kubespawner_override:
+                  extra_resource_limits:
+                    nvidia.com/gpu: "{value}"
 
         - display_name: GPU
           slug: gpu
