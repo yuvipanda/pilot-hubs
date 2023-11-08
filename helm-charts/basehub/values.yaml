@@ -169,17 +169,11 @@ jupyterhub:
     # hook prePuller leads to the creation of a temporary DaemonSet and a pod
     # awaiting pulling to complete before `helm upgrade` starts its main work.
     #
-    # It is disabled as it adds notable complexity for a smaller benefit when
-    # correctly adopted. The added complexity includes:
-    #
-    # - risk of misconfiguration making image pulls not actually needed
-    # - risk of broken expectations and additional cognitive load
-    # - risk of causing significantly longer `helm upgrade` commands slowing
-    #   down our CI system
-    # - ClusterRoleBinding resources are needed for the image-awaiter Pod
-    #   involved, a resource that requires the highest k8s cluster permission
-    #   otherwise possibly not needed to deploy basehub
-    #
+    # It is disabled by default, primarily because some hubs use the
+    # configurator to specify what image to use, and the prePuller does
+    # not know about that. https://github.com/2i2c-org/infrastructure/pull/3341
+    # should hopefully clarify this with additional documentation at
+    # some point.
     hook:
       enabled: false
   proxy:
