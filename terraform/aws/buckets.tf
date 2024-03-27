@@ -74,6 +74,26 @@ resource "aws_s3_bucket_policy" "user_bucket_access" {
   policy   = data.aws_iam_policy_document.bucket_access[each.key].json
 }
 
+
+data "aws_iam_policy_document" "list_buckets" {
+  statement {
+    effect  = "allow"
+    actions = ["s3:listallmybuckets"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "list_buckets" {
+  name        = "${var.cluster_name}-${each.key}-list-buckets-policy"
+  policy      = data.aws_iam_policy_document.list_buckets[each.key].json
+}
+
+resource "aws_iam_role_policy_attachment" "list_buckets" {
+  for_each   = { for hub_name, value in var.hub_cloud_permissions : hub_name => value if value.extra_iam_policy != "" }
+  role       = aws_iam_role.irsa_role[each.key].name
+  policy_arn = aws_iam_policy.list_buckets.arn
+}
+
 output "buckets" {
   value       = { for b, _ in var.user_buckets : b => aws_s3_bucket.user_buckets[b].id }
   description = <<-EOT
