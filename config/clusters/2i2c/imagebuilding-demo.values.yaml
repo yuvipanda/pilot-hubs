@@ -35,6 +35,8 @@ jupyterhub:
         profile_options:
           image:
             display_name: Image
+            dynamic_image_building:
+              enabled: true
             unlisted_choice: &profile_list_unlisted_choice
               enabled: True
               display_name: "Custom image"
@@ -115,7 +117,7 @@ jupyterhub:
     allowNamedServers: true
     image:
       name: quay.io/2i2c/dynamic-image-building-experiment
-      tag: "0.0.1-0.dev.git.8663.h049aa2c2"
+      tag: 0.0.1-0.dev.git.9829.h282c5c35
     config:
       JupyterHub:
         authenticator_class: github
