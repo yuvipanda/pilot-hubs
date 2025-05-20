@@ -182,6 +182,20 @@ def root_homes(
             "terminationGracePeriodSeconds": 1,
             "automountServiceAccountToken": False,
             "volumes": volumes,
+            "tolerations": [
+                    {
+                        "effect": "NoSchedule",
+                        "key": "hub.jupyter.org/dedicated",
+                        "operator": "Equal",
+                        "value": "user"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "hub.jupyter.org_dedicated",
+                        "operator": "Equal",
+                        "value": "user"
+                    }
+            ],
             "containers": [
                 {
                     "name": pod_name,
@@ -191,6 +205,14 @@ def root_homes(
                     "stdinOnce": True,
                     "tty": True,
                     "volumeMounts": volume_mounts,
+                    "securityContext": {
+                        "privileged": True
+                    },
+                    "resources": {
+                        "requests": {
+                            "cpu": "20"
+                        }
+                    }
                 }
             ],
         },
