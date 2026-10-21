@@ -16,33 +16,39 @@ charts:
         valuesPath: jupyterhub.hub.image
         buildArgs:
           REQUIREMENTS_FILE: requirements.txt
+          BASE_IMAGE: jupyterhub/k8s-hub:4.3.3
       hub-authz-helpers:
         valuesPath: jupyterhub.hub.image
         buildArgs:
           REQUIREMENTS_FILE: authz-helpers-requirements.txt
+          BASE_IMAGE: jupyterhub/k8s-hub:4.3.3
         contextPath: images/hub
         dockerfilePath: images/hub/Dockerfile
       oauthenticator-latest:
         imageName: quay.io/2i2c/oauthenticator-latest
         buildArgs:
           REQUIREMENTS_FILE: oauthenticator-latest-requirements.txt
+          BASE_IMAGE: jupyterhub/k8s-hub:4.3.3
         contextPath: images/hub
         dockerfilePath: images/hub/Dockerfile
       jupyterhub6:
         imageName: quay.io/2i2c/jupyterhub-6
         buildArgs:
           REQUIREMENTS_FILE: "latest-usage-quotas-requirements.txt"
+          BASE_IMAGE:  jupyterhub/k8s-hub:5.0.0-0.dev.git.7499.hfef2b70f
         contextPath: "images/hub"
-        dockerfilePath: images/hub/Dockerfile-jupyterhub6
+        dockerfilePath: images/hub/Dockerfile
       cloudbank:
         imageName: quay.io/2i2c/cloudbank-hub
         buildArgs:
           REQUIREMENTS_FILE: cloudbank-requirements.txt
+          BASE_IMAGE: jupyterhub/k8s-hub:4.3.3
         contextPath: images/hub
         dockerfilePath: images/hub/Dockerfile
       jupyterhub6-auth-state-reconcile:
         imageName: quay.io/2i2c/jupyterhub-6-auth-state-reconcile
         buildArgs:
           REQUIREMENTS_FILE: "auth-state-reconcile-requirements.txt"
+          BASE_IMAGE:  jupyterhub/k8s-hub:5.0.0-0.dev.git.7499.hfef2b70f
         contextPath: "images/hub"
-        dockerfilePath: images/hub/Dockerfile.auth-state-reconcile
+        dockerfilePath: images/hub/Dockerfile
